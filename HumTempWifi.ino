@@ -1,6 +1,7 @@
 #include <WiFiS3.h>
 #include "settings.h"
 #include "DHT.h"
+#include <ArduinoHttpClient.h>
 
 #define DHTPIN 8
 #define DHTTYPE DHT11
@@ -10,7 +11,6 @@ DHT dht(DHTPIN, DHTTYPE);
 char ssid[] = SECRET_SSID;
 char password[] = SECRET_PASSWORD;
 
-WiFiServer server(80);
 
 void setup() {
   Serial.begin(9600);
@@ -31,25 +31,12 @@ void setup() {
   Serial.print("IP Adress: ");
   Serial.println(ip);
 
-  server.begin();
-
   dht.begin();
 
   Serial.println("DHT11 startar...");
 }
 
 void loop() {
-
-  WiFiClient client = server.available();  //När client är ansluten lagras han i objektet client
-  //Client är false så länge det inte är någon uppkopplad emot oss
-  if (client) {
-    Serial.println("Ny klient ansluten");
-    String request = client.readStringUntil('\r');// läser inkommande paket tills dess att det är slut
-    Serial.println(request);
-
-    client.stop();  //Går ur loopen för annars kommer sidan bara stå och ladda.
-    Serial.println("Klient har kopplat från.");
-  }
 
   delay(500);
 
