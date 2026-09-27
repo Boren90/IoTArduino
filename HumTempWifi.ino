@@ -1,6 +1,7 @@
 #include <WiFiS3.h>
 #include "settings.h"
 #include "DHT.h"
+#include <ArduinoHttpClient.h>
 
 #define DHTPIN 8
 #define DHTTYPE DHT11
@@ -10,9 +11,15 @@ DHT dht(DHTPIN, DHTTYPE);
 char ssid[] = SECRET_SSID;
 char password[] = SECRET_PASSWORD;
 
-WiFiServer server(80);
+// char serverAdress [] = "192.168.0.12";
+char serverAdress [] = "192.168.50.100";
+int port = 8080;
+
+WiFiClient wifi;
+HttpClient client = HttpClient(wifi, serverAdress, port);
 
 void setup() {
+  //Startar Serial monitor
   Serial.begin(9600);
 
   Serial.println("Ansluter till WIFI...");
@@ -23,15 +30,13 @@ void setup() {
     delay(1000);
     status = WiFi.status();
   }
-
+  Serial.println("Ansluten till WiFi");
   Serial.println("SSID: ");
   Serial.println(WiFi.SSID());
   delay(2000);  //sätter en delay för att vänta in localIP
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Adress: ");
   Serial.println(ip);
-
-  server.begin();
 
   dht.begin();
 
@@ -40,18 +45,31 @@ void setup() {
 
 void loop() {
 
-  WiFiClient client = server.available();  //När client är ansluten lagras han i objektet client
-  //Client är false så länge det inte är någon uppkopplad emot oss
-  if (client) {
-    Serial.println("Ny klient ansluten");
-    String request = client.readStringUntil('\r');// läser inkommande paket tills dess att det är slut
-    Serial.println(request);
+  // String postData = "{\"humidity\":23.3}";
+  String postData = "{\"humidity\":23.3,\"temperature\":21.7}";
+  // String postData = "{\"humidity\":\"25\"}";
 
-    client.stop();  //Går ur loopen för annars kommer sidan bara stå och ladda.
-    Serial.println("Klient har kopplat från.");
-  }
+  Serial.println("Skickar vår POST");
 
-  delay(500);
+  client.beginRequest();
+  client.post("/api/humidity-temperature");
+
+  client.sendHeader("Content-Type", "application/json");
+  client.sendHeader("Content-Length", postData.length());
+
+  client.beginBody();
+  client.print(postData);
+  client.endRequest();
+
+  int statusCode = client.responseStatusCode();
+  String response = client.responseBody();
+
+  Serial.print("Status code: ");
+  Serial.println(statusCode);
+  Serial.print("Response: ");
+  Serial.print(response);
+  
+  delay(2000);
 
   float humidity = dht.readHumidity();
   float temperature = dht.readTemperature();
