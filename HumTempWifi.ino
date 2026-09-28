@@ -12,7 +12,7 @@ char ssid[] = SECRET_SSID;
 char password[] = SECRET_PASSWORD;
 
 // char serverAdress [] = "192.168.0.12";
-char serverAdress [] = "192.168.50.100";
+char serverAdress [] = "192.168.0.12";
 int port = 8080;
 
 WiFiClient wifi;
@@ -45,13 +45,25 @@ void setup() {
 
 void loop() {
 
-  // String postData = "{\"humidity\":23.3}";
-  String postData = "{\"humidity\":23.3,\"temperature\":21.7}";
-  // String postData = "{\"humidity\":\"25\"}";
+  // Läs av sensorn först
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  // Kontrollera att sensorn gav giltiga värden
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Kunde inte läsa från DHT11!");
+    delay(2000);
+    return;
+  }
+
+  // Skapa JSON från sensorvärdena
+  String postData = "{\"humidity\":" + String(humidity) + ",\"temperature\":" + String(temperature) + "}";
 
   Serial.println("Skickar vår POST");
+  Serial.println(postData);
 
   client.beginRequest();
+
   client.post("/api/humidity-temperature");
 
   client.sendHeader("Content-Type", "application/json");
@@ -66,26 +78,9 @@ void loop() {
 
   Serial.print("Status code: ");
   Serial.println(statusCode);
+
   Serial.print("Response: ");
-  Serial.print(response);
-  
+  Serial.println(response);
+
   delay(2000);
-
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
-
-  if (isnan(humidity) || isnan(temperature)) {
-    Serial.println("Kunde inte läsa från DHT11!");
-    return;
-  }
-  // delay(2000);
-  // Serial.print("Temperatur: ");
-  // Serial.print(temperature);
-  // Serial.println(" °C");
-
-  // Serial.print("Luftfuktighet: ");
-  // Serial.print(humidity);
-  // Serial.println(" %");
-
-  // Serial.println("--------------------");
 }
