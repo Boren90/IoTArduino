@@ -11,7 +11,6 @@ DHT dht(DHTPIN, DHTTYPE);
 char ssid[] = SECRET_SSID;
 char password[] = SECRET_PASSWORD;
 
-// char serverAdress [] = "192.168.0.12";
 char serverAdress [] = "192.168.0.12";
 int port = 8080;
 
@@ -81,6 +80,6 @@ void loop() {
 
   Serial.print("Response: ");
   Serial.println(response);
-
-  delay(2000);
+  //10min
+  delay(600 000);
 }
