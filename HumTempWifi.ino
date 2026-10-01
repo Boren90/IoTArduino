@@ -81,5 +81,5 @@ void loop() {
   Serial.print("Response: ");
   Serial.println(response);
   //10min
-  delay(600 000);
+  delay(600000);
 }
