@@ -54,6 +54,20 @@ Arduino läser av:
 - Välj Arduino UNO R4 WiFi som board.
 - Välj rätt COM-port.
 - Ladda upp programmet till Arduino.
+- Testa POST endpoint med din IP och lokala port
+
+```text
+http://192.168.0.x:8080/api/humidity-temperature
+```
+
+```json
+{
+    "humidity": 48.5,
+    "temperature": 22.4
+}
+```
+
+
 
 ### Ange serverns IP-adress
 
